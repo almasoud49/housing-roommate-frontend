@@ -1,42 +1,44 @@
 # AGENTS.md
 
-Next.js 16 frontend (App Router, React 19, TS, Tailwind v4, shadcn/ui) for the Housing & Roommate Platform. Consumes the separate backend at `housing-roommate-platform/` (Express + Prisma + bKash). No tests, no CI.
+Next.js 16 frontend (App Router, React 19, TS, Tailwind v4, shadcn/ui `base-nova`) for the Housing & Roommate Platform. Consumes the separate backend at `housing-roommate-platform/` (Express + Prisma + bKash). No tests, no CI.
+
+Directory structure and code style mirror `Apollo-Level2-Web-Dev/PH-Healthcare-Nextjs` (part-7):
+
+- `src/app/(public)/(authentication)/...` — login, register, forgot-password
+- `src/app/(public)/(marketing)/...` — home, about, services, pricing, contact, properties, payment
+- `src/app/(dashboard)/dashboard|landlord|admin/...` — each with own `layout.tsx` wrapping RoleGuard + DashboardShell
+- `src/api/*.api.ts` — thin API functions returning `apiClient` promises
+- `src/hooks/*.hook.ts` — TanStack Query wrappers around api functions; always import from `@/hooks`
+- `src/lib/apiClient.ts` — ofetch instance; injects `Authorization: Bearer` from localStorage
+- `src/routes/*.routes.ts` — sidebar route config per role; `src/types/*.type.ts`; `src/validation/*.validation.ts`; `src/utils/*.util.ts`
+- `src/components/{auth,dashboard,form,layout,modules,ui}` — guards, shell, forms, header/footer, feature modules, shadcn ui
+- `src/assets/svg` — logo components
 
 ## Commands
 
 - `npm run dev` — dev server (port 3000)
-- `npm run build` — production build (Turbopack); this is the main verification step
+- `npm run build` — production build (Turbopack); the main verification step
 - `npm start` — serve the production build
 - `npm run lint` — eslint
 - No typecheck script: run `npx tsc --noEmit` manually
 
 ## Setup
 
-- `.env.local` must set `NEXT_PUBLIC_API_URL` (e.g. `https://housing-roommate-platform.vercel.app/api/v1`). It is gitignored; `.env.example` is committed.
-- Frontend and backend repos are separate. `assignments/` root is a git repo pointing at the **backend** remote — never commit from there; this folder has its own git repo.
+- `.env.local` must set `NEXT_PUBLIC_API_URL` (e.g. `https://housing-roommate-platform.vercel.app/api/v1`). Gitignored; `.env.example` is committed.
+- `assignments/` root is a git repo pointing at the **backend** remote — never commit from there; this folder has its own git repo.
 
 ## Architecture notes (non-obvious)
 
-- App Router groups: public pages at root, tenant at `/dashboard/*`, landlord at `/landlord/*`, admin at `/admin/*`, payment at `/payment/*`.
-- `src/middleware.ts` gates `/dashboard`, `/landlord`, `/admin` via the `hr_role` cookie. UI must also check role via `useAuth()` — middleware alone is UX, not security.
-- Auth flow: `POST /auth/login` → `accessToken` JWT in response body. Zustand store in `src/store/auth.ts` persists it to `localStorage` key `hr-auth` and sets `hr_role` cookie. Axios interceptor in `src/lib/api.ts` reads localStorage and sets `Authorization: Bearer`. Do not fetch with raw `fetch` in client components — use `api`.
-- Every list/data page must keep filter/sort/pagination state in the URL via `useSearchParams` so views are shareable.
-- Use `loading.tsx` + skeletons, error boundaries (`error.tsx`), and Sonner toasts for API failures.
+- Auth: login stores JWT in localStorage key `accessToken` and sets `hr_role` cookie; `apiClient` reads localStorage for the Bearer header. `useGetMe` (`/auth/me`) drives guards/header. `AuthGuard`/`RoleGuard` in `src/components/auth` wrap protected layouts. `src/middleware.ts` also redirects via `hr_role` — cookie alone is UX, the API is the real guard.
+- bKash payment: `POST /payment/initiate` → `res.data.bkashCreateResponse.bkashURL` → full-page redirect; success/cancel land on `/payment/success` / `/payment/cancel`.
+- Many backend list endpoints return a paginated envelope `{data: {data: [], meta}}` — unwrap `res.data.data` or `res.data.data.data` (see hooks/pages).
+- Registration/OTP flows depend on Redis; on Vercel they need the `connectRedis()` fix in the backend to be deployed, else `{"message":"The client is closed"}`.
+- Sidebar navigation is data-driven from `src/routes/*.routes.ts` via `DashboardSidebar`.
 
-## UI gotchas
+## Conventions
 
-- shadcn/ui here is style `base-nova`: components import from `@base-ui/react/*`, **not** Radix. `Button` does not support `asChild` — use `<Button render={<Link href="/x" />}>label</Button>`.
-- Class merging imports `cn` from the `cn` npm package (`import { cn } from "cn"`), not from `@/lib/utils`.
-- Theme tokens live in `src/app/globals.css` (`@theme inline` mapping); don't re-add dark `prefers-color-scheme` blocks.
-
-## Forms / validation
-
-- React Hook Form + Zod (**zod v3** — use `z.string().email()`, not `z.email()`).
-- Client schemas roughly mirror backend zod schemas in `housing-roommate-platform/src/app/module/*/*.validation.ts`; when unsure of an API payload, check those first (e.g. maintenance create requires `roomId` + `category`; applications create requires `roomId`).
-
-## Backend integration notes
-
-- Payment: `POST /payment/initiate {applicationId, amount, currency:"BDT"}` → response contains `bkashCreateResponse.bkashURL` → redirect browser there; bKash callback returns to `/payment/success` or `/payment/cancel`.
-- Registration/verify-email/forgot-password require OTP via email (Redis-backed). If the deployed backend hasn't been redeployed with the Redis `connectRedis()` fix, these endpoints return `{"message":"The client is closed"}`.
-- Demo login accounts (also hardcoded on `/login`): see README.md.
-- Notifications list endpoint returns a paginated `{data, meta}` envelope, not a bare array — several list endpoints do this; unwrap `res.data.data.data` or use the array-unwrapping seen in existing pages.
+- Forms use `@tanstack/react-form` with zod v4 schemas from `@/validation` (zod v4: `z.email()`), `Field`/`FieldError` ui components.
+- Toasts: `sonner` (`toast.success/error`).
+- `Button` does not support `asChild` — use `<Button render={<Link href="/x" />}>label</Button>`.
+- `cn` comes from the `cn` npm package (`import { cn } from "cn"`), theme tokens in `src/app/globals.css` `@theme inline`.
+- Demo credentials and route map live in README.md.
