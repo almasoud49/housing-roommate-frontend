@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { serverFetch } from "@/utils/server-fetch.util";
 import type { Property } from "@/types";
-import { Shield, Users, Wrench, CreditCard, Search, CheckCircle2, Building2, Star, FileText, Receipt, CalendarCheck, LayoutDashboard } from "lucide-react";
+import { Shield, Users, Wrench, CreditCard, Search, Building2, Star, FileText, Receipt, CalendarCheck, LayoutDashboard } from "lucide-react";
 
 export const metadata = {
   title: "HavenMate — Find Rooms & Roommates",
@@ -179,18 +179,20 @@ export default async function HomePage() {
       <section className="bg-muted/30 py-16">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="mb-8 text-2xl font-bold">How It Works</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="absolute left-0 right-0 top-5 hidden h-0.5 bg-border lg:block" />
             {[
-              "Create your free account",
-              "Browse verified listings",
-              "Apply or post your property",
-              "Move in & manage everything",
+              { title: "Create your free account", desc: "Sign up as a tenant, landlord, or manager." },
+              { title: "Browse or list", desc: "Search verified listings or post your own space." },
+              { title: "Apply & verify", desc: "Send applications and complete ID validation." },
+              { title: "Move in & manage", desc: "Pay via bKash and track maintenance." },
             ].map((step, i) => (
-              <div key={step} className="flex items-start gap-3">
-                <CheckCircle2 className="mt-1 size-5 shrink-0 text-primary" />
-                <p className="font-medium">
-                  <span className="text-muted-foreground">Step {i + 1}:</span> {step}
-                </p>
+              <div key={step.title} className="relative flex flex-col items-start gap-3 bg-muted/30 lg:items-center lg:text-center">
+                <span className="z-10 flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                  {i + 1}
+                </span>
+                <h3 className="font-semibold">{step.title}</h3>
+                <p className="text-sm text-muted-foreground">{step.desc}</p>
               </div>
             ))}
           </div>
