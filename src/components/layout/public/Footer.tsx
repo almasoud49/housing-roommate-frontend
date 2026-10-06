@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Globe, Mail, Phone, MessageCircle } from "lucide-react";
 import NewsletterForm from "./NewsletterForm";
 
 export default function Footer() {
@@ -36,10 +36,10 @@ export default function Footer() {
           <p className="mb-3 text-sm text-muted-foreground">Get the latest listings and tips.</p>
           <NewsletterForm />
           <div className="mt-4 flex gap-4 text-muted-foreground">
-            <Facebook className="size-5 hover:text-primary" />
-            <Twitter className="size-5 hover:text-primary" />
-            <Instagram className="size-5 hover:text-primary" />
-            <Linkedin className="size-5 hover:text-primary" />
+            <Globe className="size-5 hover:text-primary" />
+            <Mail className="size-5 hover:text-primary" />
+            <Phone className="size-5 hover:text-primary" />
+            <MessageCircle className="size-5 hover:text-primary" />
           </div>
         </div>
       </div>
