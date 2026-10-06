@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Menu, User as UserIcon } from "lucide-react";
+import ThemeToggle from "@/components/layout/public/ThemeToggle";
 import { clearAccessToken, setRoleCookie } from "@/utils/auth.utils";
 import { cn } from "cn";
 
@@ -81,6 +82,7 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle />
           {role ? (
             <>
               <Button variant="outline" size="sm" render={<Link href={dashboardRoute[role]} />}>

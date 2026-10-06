@@ -47,7 +47,7 @@ export default function TenantOverview() {
           {appsData.slice(0, 5).map((a) => (
             <div key={a.id} className="flex items-center justify-between rounded-lg border p-4">
               <span>{applicationTitle(a)}</span>
-              <span className={`rounded-full px-3 py-1 text-xs ${a.status === "ACCEPTED" ? "bg-green-100 text-green-700" : a.status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{a.status}</span>
+              <span className={`rounded-full px-3 py-1 text-xs ${a.status === "ACCEPTED" ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" : a.status === "REJECTED" ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300"}`}>{a.status}</span>
             </div>
           ))}
         </div>
