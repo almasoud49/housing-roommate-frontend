@@ -17,7 +17,6 @@ import { cn } from "cn";
 
 const routes = [
   { name: "Home", url: "/" },
-  { name: "Browse", url: "/properties" },
   { name: "About", url: "/about" },
   { name: "Services", url: "/services" },
   { name: "Pricing", url: "/pricing" },

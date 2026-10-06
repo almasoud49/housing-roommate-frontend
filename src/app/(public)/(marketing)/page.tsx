@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { serverFetch } from "@/utils/server-fetch.util";
 import type { Property } from "@/types";
-import { Shield, Users, Wrench, CreditCard, Search, CheckCircle2, Building2, Star } from "lucide-react";
+import { Shield, Users, Wrench, CreditCard, Search, CheckCircle2, Building2, Star, FileText, Receipt, CalendarCheck, LayoutDashboard } from "lucide-react";
 
 export const metadata = {
   title: "HavenMate — Find Rooms & Roommates",
@@ -67,6 +67,31 @@ export default async function HomePage() {
             { icon: Users, title: "Roommate Matching", desc: "Smart preference matching for compatible housemates." },
             { icon: CreditCard, title: "Secure Payments", desc: "Pay rent & deposits safely via bKash." },
             { icon: Wrench, title: "Maintenance", desc: "Raise and track repair requests with ease." },
+          ].map((f) => (
+            <Card key={f.title}>
+              <CardContent className="flex flex-col gap-3 p-6">
+                <f.icon className="size-8 text-primary" />
+                <h3 className="font-semibold">{f.title}</h3>
+                <p className="text-sm text-muted-foreground">{f.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="mb-2 text-2xl font-bold">Everything You Need</h2>
+        <p className="mb-8 text-muted-foreground">A complete toolkit for tenants, landlords, and property managers.</p>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { icon: Shield, title: "Verified Listings", desc: "Every property and landlord is verified before going live." },
+            { icon: Users, title: "Roommate Matching", desc: "Smart preference matching for compatible housemates." },
+            { icon: FileText, title: "Application Tracking", desc: "Apply in one click and follow your application status in real time." },
+            { icon: CreditCard, title: "Secure bKash Payments", desc: "Pay deposits and rent online with full receipts." },
+            { icon: Receipt, title: "Utility Bill Splitting", desc: "Fairly split shared electricity, water, and internet bills." },
+            { icon: Wrench, title: "Maintenance Requests", desc: "Raise repair tickets and track progress to resolution." },
+            { icon: CalendarCheck, title: "Viewing Schedules", desc: "Book property viewings and get reminders." },
+            { icon: LayoutDashboard, title: "Role-Based Dashboards", desc: "Tailored experiences for tenants, landlords, and admins." },
           ].map((f) => (
             <Card key={f.title}>
               <CardContent className="flex flex-col gap-3 p-6">
