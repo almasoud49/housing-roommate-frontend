@@ -130,22 +130,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-4 py-16">
-        <h2 className="mb-6 text-2xl font-bold">Frequently Asked Questions</h2>
-        <div className="divide-y rounded-xl border">
-          {[
-            { q: "Is HavenMate free to use?", a: "Yes — searching, posting a listing, and basic roommate matching are free for all users." },
-            { q: "How are listings verified?", a: "Every property and landlord is reviewed by our team before going live, and tenants can earn a Validated badge." },
-            { q: "How do payments work?", a: "Rent and deposits are paid securely via bKash, with automatic receipts stored in your dashboard." },
-            { q: "Can I manage multiple properties?", a: "Yes — landlords and property managers get analytics, application review, and maintenance tracking in one place." },
-          ].map((item) => (
-            <details key={item.q} className="group px-5 py-4">
-              <summary className="cursor-pointer font-medium group-open:text-primary">{item.q}</summary>
-              <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="mb-8 text-2xl font-bold">Why HavenMate</h2>
@@ -255,6 +239,25 @@ export default async function HomePage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-950 py-16">
+      <div className="mx-auto max-w-4xl px-4">
+        <h2 className="mb-6 text-2xl font-bold">Frequently Asked Questions</h2>
+        <div className="divide-y rounded-xl border bg-background/60 shadow-sm backdrop-blur">
+          {[
+            { q: "Is HavenMate free to use?", a: "Yes — searching, posting a listing, and basic roommate matching are free for all users." },
+            { q: "How are listings verified?", a: "Every property and landlord is reviewed by our team before going live, and tenants can earn a Validated badge." },
+            { q: "How do payments work?", a: "Rent and deposits are paid securely via bKash, with automatic receipts stored in your dashboard." },
+            { q: "Can I manage multiple properties?", a: "Yes — landlords and property managers get analytics, application review, and maintenance tracking in one place." },
+          ].map((item) => (
+            <details key={item.q} className="group px-5 py-4">
+              <summary className="cursor-pointer font-medium group-open:text-primary">{item.q}</summary>
+              <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
+            </details>
+          ))}
+        </div>
+            </div>
       </section>
 
       <section className="bg-gradient-to-r from-emerald-600 to-teal-600 py-16 text-white">
