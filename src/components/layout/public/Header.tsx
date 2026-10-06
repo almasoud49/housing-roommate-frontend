@@ -2,13 +2,17 @@
 
 import Logo from "@/assets/svg/Logo";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGetMe, useLogout } from "@/hooks";
 import { toast } from "sonner";
 import { UserRole } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { Menu, User as UserIcon } from "lucide-react";
 import { clearAccessToken, setRoleCookie } from "@/utils/auth.utils";
+import { cn } from "cn";
 
 const routes = [
   { name: "Home", url: "/" },
@@ -28,10 +32,13 @@ const dashboardRoute: Record<UserRole, string> = {
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data } = useGetMe();
   const { mutate: logout } = useLogout();
   const queryClient = useQueryClient();
-  const role = data?.data?.role as UserRole | undefined;
+  const [open, setOpen] = useState(false);
+  const user = data?.data;
+  const role = user?.role as UserRole | undefined;
 
   const handleLogout = () => {
     logout(undefined, {
@@ -47,6 +54,9 @@ export default function Header() {
     });
   };
 
+  const isActive = (url: string) =>
+    url === "/" ? pathname === "/" : pathname.startsWith(url);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
@@ -54,17 +64,28 @@ export default function Header() {
           <Logo />
           <span>HavenMate</span>
         </Link>
+
         <nav className="hidden gap-5 md:flex">
           {routes.map((route) => (
-            <Link key={route.name} href={route.url} className="text-sm hover:text-primary">
+            <Link
+              key={route.name}
+              href={route.url}
+              className={cn(
+                "text-sm transition hover:text-primary",
+                isActive(route.url) && "font-medium text-primary",
+              )}
+            >
               {route.name}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+
+        <div className="hidden items-center gap-2 md:flex">
           {role ? (
             <>
-              <Button variant="outline" size="sm" render={<Link href={dashboardRoute[role]} />}>Dashboard</Button>
+              <Button variant="outline" size="sm" render={<Link href={dashboardRoute[role]} />}>
+                <UserIcon className="size-4" /> {user?.name ?? "Dashboard"}
+              </Button>
               <Button size="sm" variant="destructive" onClick={handleLogout}>Logout</Button>
             </>
           ) : (
@@ -74,6 +95,40 @@ export default function Header() {
             </>
           )}
         </div>
+
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger className="md:hidden" aria-label="Open menu">
+            <Menu className="size-6" />
+          </SheetTrigger>
+          <SheetContent side="right" className="w-72">
+            <nav className="mt-8 flex flex-col gap-4">
+              {routes.map((route) => (
+                <Link
+                  key={route.name}
+                  href={route.url}
+                  onClick={() => setOpen(false)}
+                  className={cn("text-base", isActive(route.url) && "font-medium text-primary")}
+                >
+                  {route.name}
+                </Link>
+              ))}
+              <div className="my-2 h-px bg-border" />
+              {role ? (
+                <>
+                  <Link href={dashboardRoute[role]} onClick={() => setOpen(false)} className="font-medium text-primary">
+                    Dashboard ({user?.name})
+                  </Link>
+                  <button className="text-left text-destructive" onClick={handleLogout}>Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setOpen(false)}>Login</Link>
+                  <Link href="/register" onClick={() => setOpen(false)}>Register</Link>
+                </>
+              )}
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );
