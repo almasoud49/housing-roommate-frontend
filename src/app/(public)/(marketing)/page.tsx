@@ -60,6 +60,94 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="mb-8 text-2xl font-bold">What are you looking for?</h2>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            { title: "A room to rent", desc: "Browse furnished rooms, flats, and shared homes near you.", href: "/properties", cta: "Search rooms" },
+            { title: "A roommate", desc: "Find compatible housemates matched on lifestyle and budget.", href: "/dashboard/roommate", cta: "Find roommates" },
+            { title: "List your space", desc: "Have a room? Post it free and reach verified tenants.", href: "/landlord/properties/new", cta: "List a room" },
+          ].map((c) => (
+            <Link href={c.href} key={c.title}>
+              <Card className="h-full transition hover:shadow-md">
+                <CardContent className="flex h-full flex-col gap-3 p-6">
+                  <h3 className="text-lg font-semibold">{c.title}</h3>
+                  <p className="text-sm text-muted-foreground">{c.desc}</p>
+                  <span className="mt-auto inline-flex w-fit rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">{c.cta}</span>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-muted/30 py-16">
+        <div className="mx-auto max-w-6xl px-4 text-center">
+          <h2 className="mb-6 text-2xl font-bold">Popular Cities</h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            {["Dhaka", "Chittagong", "Sylhet", "Khulna", "Rajshahi", "Barisal", "Cox's Bazar", "Comilla", "Rangpur", "Mymensingh"].map((city) => (
+              <Link key={city} href={`/properties?city=${encodeURIComponent(city)}`} className="rounded-full border bg-background px-4 py-2 text-sm transition hover:border-primary hover:text-primary">
+                {city}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="mb-2 text-2xl font-bold">Trust & Safety First</h2>
+        <p className="mb-8 text-muted-foreground">We verify every profile and listing so you can rent with confidence.</p>
+        <div className="grid gap-6 sm:grid-cols-3">
+          {[
+            { title: "ID-verified members", desc: "Profiles are reviewed by our moderation team with a Validated badge." },
+            { title: "Secure messaging", desc: "Chat safely in-app before sharing personal details." },
+            { title: "Scam screening", desc: "Automated filters plus human review to keep listings genuine." },
+          ].map((f) => (
+            <div key={f.title} className="rounded-xl border p-6">
+              <h3 className="mb-2 font-semibold">{f.title}</h3>
+              <p className="text-sm text-muted-foreground">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-muted/30 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-8 text-2xl font-bold">What Our Users Say</h2>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              { name: "Arif H.", city: "Dhaka", quote: "Found a verified room within a week and paid the deposit securely via bKash." },
+              { name: "Nadia K.", city: "Chittagong", quote: "The roommate matching actually worked — my housemate scored 95% on preferences." },
+              { name: "Rasel M.", city: "Sylhet", quote: "As a landlord, managing applications and earnings from one dashboard is easy." },
+            ].map((t) => (
+              <Card key={t.name}>
+                <CardContent className="p-6">
+                  <p className="mb-4 text-sm text-muted-foreground">“{t.quote}”</p>
+                  <p className="font-medium">{t.name} <span className="text-sm text-muted-foreground">— {t.city}</span></p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-4 py-16">
+        <h2 className="mb-6 text-2xl font-bold">Frequently Asked Questions</h2>
+        <div className="divide-y rounded-xl border">
+          {[
+            { q: "Is HavenMate free to use?", a: "Yes — searching, posting a listing, and basic roommate matching are free for all users." },
+            { q: "How are listings verified?", a: "Every property and landlord is reviewed by our team before going live, and tenants can earn a Validated badge." },
+            { q: "How do payments work?", a: "Rent and deposits are paid securely via bKash, with automatic receipts stored in your dashboard." },
+            { q: "Can I manage multiple properties?", a: "Yes — landlords and property managers get analytics, application review, and maintenance tracking in one place." },
+          ].map((item) => (
+            <details key={item.q} className="group px-5 py-4">
+              <summary className="cursor-pointer font-medium group-open:text-primary">{item.q}</summary>
+              <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="mb-8 text-2xl font-bold">Why HavenMate</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[
