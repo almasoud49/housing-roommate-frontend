@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith(ADMIN_PREFIX) && role !== "ADMIN") {
     return NextResponse.redirect(new URL("/", request.url));
   }
-  if (pathname.startsWith(LANDLORD_PREFIX) && role !== "LANDLORD" && role !== "ADMIN") {
+  if (pathname.startsWith(LANDLORD_PREFIX) && role !== "LANDLORD" && role !== "ADMIN" && role !== "PROPERTY_MANAGER") {
     return NextResponse.redirect(new URL("/", request.url));
   }
   if (pathname.startsWith(TENANT_PREFIX) && role !== "TENANT") {
@@ -31,7 +31,7 @@ export function middleware(request: NextRequest) {
 
   if (pathname === "/login" && role) {
     const dest =
-      role === "ADMIN" ? "/admin" : role === "LANDLORD" ? "/landlord" : "/dashboard";
+      role === "ADMIN" ? "/admin" : role === "LANDLORD" || role === "PROPERTY_MANAGER" ? "/landlord" : "/dashboard";
     return NextResponse.redirect(new URL(dest, request.url));
   }
 

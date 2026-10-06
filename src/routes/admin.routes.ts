@@ -8,6 +8,7 @@ export const adminRoutes = [
       { title: "Users", url: `${prefix}/users` },
       { title: "Audit Logs", url: `${prefix}/audit-logs` },
       { title: "Settings", url: `${prefix}/settings` },
+      { title: "Notifications", url: `${prefix}/notifications` },
     ],
   },
 ];

@@ -9,6 +9,7 @@ export const landlordRoutes = [
       { title: "Add Property", url: `${prefix}/properties/new` },
       { title: "Applications", url: `${prefix}/applications` },
       { title: "Earnings", url: `${prefix}/earnings` },
+      { title: "Notifications", url: `${prefix}/notifications` },
       { title: "Profile", url: `${prefix}/profile` },
     ],
   },
