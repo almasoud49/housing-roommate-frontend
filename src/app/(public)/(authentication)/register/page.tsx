@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import RegisterForm from "@/components/form/register-form";
 import Logo from "@/assets/svg/Logo";
 import Link from "next/link";
@@ -13,7 +14,9 @@ export default function RegisterPage() {
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <RegisterForm />
+          <Suspense>
+            <RegisterForm />
+          </Suspense>
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block" />
