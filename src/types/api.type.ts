@@ -16,3 +16,8 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: Meta;
 }
+
+/** Envelope returned by every paginated list endpoint (`sendPaginated` on the backend). */
+export interface ListResponse<T> extends ApiResponse<T[]> {
+  meta?: Meta;
+}
