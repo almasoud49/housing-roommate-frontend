@@ -31,3 +31,7 @@ export interface LoginResponse {
   message: string;
   data: { accessToken: string };
 }
+
+export interface GoogleLoginPayload {
+  idToken: string;
+}
