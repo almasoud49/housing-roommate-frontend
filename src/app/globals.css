@@ -5,7 +5,7 @@
 :root {
   /* Comfortable off-white, not harsh pure white */
   --background: oklch(0.985 0.004 160);
-  --foreground: oklch(0.24 0.02 180);
+  --foreground: oklch(0 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.02 180);
   --popover: oklch(1 0 0);
