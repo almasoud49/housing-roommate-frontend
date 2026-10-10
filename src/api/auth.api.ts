@@ -1,6 +1,7 @@
 import apiClient from "@/lib/apiClient";
 import {
   ForgotPasswordPayload,
+  GoogleLoginPayload,
   LoginPayload,
   RegistrationPayload,
   ResetPasswordPayload,
@@ -19,12 +20,21 @@ export function verifyAccount(payload: VerifyAccountPayload) {
   return apiClient("/auth/verify-email", { method: "POST", body: payload });
 }
 
+export function googleLogin(payload: GoogleLoginPayload) {
+  return apiClient("/auth/google-login", { method: "POST", body: payload });
+}
+
 export function forgotPassword(payload: ForgotPasswordPayload) {
   return apiClient("/auth/forgot-password", { method: "POST", body: payload });
 }
 
 export function resetPassword(payload: ResetPasswordPayload) {
   return apiClient("/auth/reset-password", { method: "POST", body: payload });
+}
+
+/** Uses the httpOnly `refreshToken` cookie; returns `{ data: { accessToken } }`. */
+export function refreshToken() {
+  return apiClient("/auth/refresh-token", { method: "POST" });
 }
 
 export function userLogout() {
