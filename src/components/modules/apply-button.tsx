@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { useCreateApplication, useGetMe } from "@/hooks";
 import { getErrorMessage } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface Room {
@@ -51,7 +53,7 @@ export default function ApplyButton({ rooms }: { rooms: Room[] }) {
           <DialogTitle>Apply for a Room</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <select className="h-9 w-full rounded-md border px-3 text-sm" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+          <NativeSelect value={roomId} onChange={(e) => setRoomId(e.target.value)}>
             <option value="">Select a room...</option>
             {rooms
               .filter((r) => r.isActive)
@@ -60,9 +62,8 @@ export default function ApplyButton({ rooms }: { rooms: Room[] }) {
                   {r.name} — ৳{r.price}/mo
                 </option>
               ))}
-          </select>
-          <textarea
-            className="w-full rounded-md border p-2 text-sm"
+          </NativeSelect>
+          <Textarea
             placeholder="Message to the landlord (optional)"
             value={message}
             onChange={(e) => setMessage(e.target.value)}

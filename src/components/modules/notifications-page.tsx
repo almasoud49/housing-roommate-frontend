@@ -1,41 +1,77 @@
 "use client";
 
-import { useNotifications, useMarkAllNotificationsRead } from "@/hooks";
-import type { NotificationItem } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { toast } from "sonner";
+import {
+  useDeleteNotification,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotifications,
+  useNotificationStream,
+} from "@/hooks";
 import { getErrorMessage } from "@/lib/apiClient";
-import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
+import { ListState, PageHeader, PaginationBar } from "@/components/modules/common";
+import { formatDateTime } from "@/utils/format.util";
 
 export default function NotificationsPage() {
-  const qc = useQueryClient();
-  const { data, isLoading } = useNotifications();
-  const { mutate: markAll } = useMarkAllNotificationsRead();
+  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState<"" | "unread" | "read">("");
+  const { data, isLoading, error } = useNotifications({
+    page,
+    limit: 10,
+    ...(filter ? { isRead: filter === "read" } : {}),
+  });
+  const markAll = useMarkAllNotificationsRead();
+  const markOne = useMarkNotificationRead();
+  const remove = useDeleteNotification();
+  useNotificationStream();
 
-  const d = data?.data as unknown;
-  const notifications: NotificationItem[] = Array.isArray(d) ? d : ((d as { data?: NotificationItem[] })?.data ?? []);
-
-  if (isLoading) return <Skeleton className="h-64 w-full" />;
+  const notifications = data?.data ?? [];
+  const onError = (e: unknown) => toast.error(getErrorMessage(e));
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Notifications</h1>
-        <Button variant="outline" size="sm" onClick={() => markAll(undefined, { onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }), onError: (e) => toast.error(getErrorMessage(e)) })}>Mark all read</Button>
-      </div>
-      {!notifications.length ? (
-        <p className="text-muted-foreground">No notifications yet.</p>
-      ) : (
+      <PageHeader
+        title="Notifications"
+        action={
+          <div className="flex gap-2">
+            <NativeSelect className="w-32" value={filter} onChange={(e) => { setFilter(e.target.value as typeof filter); setPage(1); }}>
+              <option value="">All</option>
+              <option value="unread">Unread</option>
+              <option value="read">Read</option>
+            </NativeSelect>
+            <Button variant="outline" size="sm" disabled={markAll.isPending} onClick={() => markAll.mutate(undefined, { onSuccess: () => toast.success("All marked as read"), onError })}>
+              Mark all read
+            </Button>
+          </div>
+        }
+      />
+      <ListState isLoading={isLoading} error={error} isEmpty={!notifications.length} emptyText="No notifications yet.">
         <div className="space-y-3">
           {notifications.map((n) => (
-            <div key={n.id} className={`rounded-lg border p-4 ${n.isRead ? "" : "border-primary/30 bg-primary/5"}`}>
-              <p className="font-medium">{n.title}</p>
-              <p className="text-sm text-muted-foreground">{n.message}</p>
+            <div key={n.id} className={`flex items-start justify-between gap-3 rounded-lg border p-4 ${n.isRead ? "" : "border-primary/30 bg-primary/5"}`}>
+              <div>
+                <p className="font-medium">{n.title}</p>
+                <p className="text-sm text-muted-foreground">{n.message}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(n.createdAt)}</p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                {!n.isRead && (
+                  <Button size="sm" variant="outline" onClick={() => markOne.mutate(n.id, { onError })}>
+                    Mark read
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => remove.mutate(n.id, { onSuccess: () => toast.success("Deleted"), onError })}>
+                  Delete
+                </Button>
+              </div>
             </div>
           ))}
         </div>
-      )}
+        <PaginationBar meta={data?.meta} onPageChange={setPage} />
+      </ListState>
     </div>
   );
 }
