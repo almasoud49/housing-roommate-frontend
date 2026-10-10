@@ -7,7 +7,7 @@ const services = [
   { title: "Verified Property Listings", desc: "Browse apartments, houses and rooms verified by our team.", href: "/properties", category: "Browse" },
   { title: "Roommate Matching", desc: "Set lifestyle preferences and get matched with compatible roommates.", href: "/dashboard/roommate", category: "Tenants" },
   { title: "Application Workflow", desc: "Apply to a property in minutes and track your application status.", href: "/dashboard/applications", category: "Tenants" },
-  { title: "Secure Rent Payments", desc: "Pay deposits and rent online via bKash with full receipts.", href: "/dashboard/payments", category: "Payments" },
+  { title: "Secure Rent Payments", desc: "Pay deposits and rent online via SSLCommerz with full receipts.", href: "/dashboard/payments", category: "Payments" },
   { title: "Utility Bill Splitting", desc: "Split shared electricity, water and internet bills fairly.", href: "/dashboard", category: "Tenants" },
   { title: "Maintenance Requests", desc: "Submit repair requests and track progress to resolution.", href: "/dashboard/maintenance", category: "Tenants" },
   { title: "Viewing Schedules", desc: "Book property viewings and get reminders.", href: "/dashboard/viewings", category: "Tenants" },

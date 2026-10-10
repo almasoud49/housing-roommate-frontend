@@ -115,7 +115,7 @@ export default async function HomePage() {
           <h2 className="mb-8 text-2xl font-bold">What Our Users Say</h2>
           <div className="grid gap-6 md:grid-cols-3">
             {[
-              { name: "Arif H.", city: "Dhaka", quote: "Found a verified room within a week and paid the deposit securely via bKash." },
+              { name: "Arif H.", city: "Dhaka", quote: "Found a verified room within a week and paid the deposit securely via SSLCOMMERZ." },
               { name: "Nadia K.", city: "Chittagong", quote: "The roommate matching actually worked — my housemate scored 95% on preferences." },
               { name: "Rasel M.", city: "Sylhet", quote: "As a landlord, managing applications and earnings from one dashboard is easy." },
             ].map((t) => (
@@ -137,7 +137,7 @@ export default async function HomePage() {
           {[
             { icon: Shield, title: "Verified Listings", desc: "Every property and landlord is verified before going live." },
             { icon: Users, title: "Roommate Matching", desc: "Smart preference matching for compatible housemates." },
-            { icon: CreditCard, title: "Secure Payments", desc: "Pay rent & deposits safely via bKash." },
+            { icon: CreditCard, title: "Secure Payments", desc: "Pay rent & deposits safely via SSLCOMMERZ." },
             { icon: Wrench, title: "Maintenance", desc: "Raise and track repair requests with ease." },
           ].map((f) => (
             <Card key={f.title}>
@@ -159,7 +159,7 @@ export default async function HomePage() {
             { icon: Shield, title: "Verified Listings", desc: "Every property and landlord is verified before going live." },
             { icon: Users, title: "Roommate Matching", desc: "Smart preference matching for compatible housemates." },
             { icon: FileText, title: "Application Tracking", desc: "Apply in one click and follow your application status in real time." },
-            { icon: CreditCard, title: "Secure bKash Payments", desc: "Pay deposits and rent online with full receipts." },
+            { icon: CreditCard, title: "Secure SSLCOMMERZ Payments", desc: "Pay deposits and rent online with full receipts." },
             { icon: Receipt, title: "Utility Bill Splitting", desc: "Fairly split shared electricity, water, and internet bills." },
             { icon: Wrench, title: "Maintenance Requests", desc: "Raise repair tickets and track progress to resolution." },
             { icon: CalendarCheck, title: "Viewing Schedules", desc: "Book property viewings and get reminders." },
@@ -185,7 +185,7 @@ export default async function HomePage() {
               { title: "Create your free account", desc: "Sign up as a tenant, landlord, or manager." },
               { title: "Browse or list", desc: "Search verified listings or post your own space." },
               { title: "Apply & verify", desc: "Send applications and complete ID validation." },
-              { title: "Move in & manage", desc: "Pay via bKash and track maintenance." },
+              { title: "Move in & manage", desc: "Pay via SSLCOMMERZ and track maintenance." },
             ].map((step, i) => (
               <div key={step.title} className="relative flex flex-col items-start gap-3 bg-muted/30 lg:items-center lg:text-center">
                 <span className="z-10 flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
@@ -250,7 +250,7 @@ export default async function HomePage() {
           {[
             { q: "Is HavenMate free to use?", a: "Yes — searching, posting a listing, and basic roommate matching are free for all users." },
             { q: "How are listings verified?", a: "Every property and landlord is reviewed by our team before going live, and tenants can earn a Validated badge." },
-            { q: "How do payments work?", a: "Rent and deposits are paid securely via bKash, with automatic receipts stored in your dashboard." },
+            { q: "How do payments work?", a: "Rent and deposits are paid securely via SSLCOMMERZ, with automatic receipts stored in your dashboard." },
             { q: "Can I manage multiple properties?", a: "Yes — landlords and property managers get analytics, application review, and maintenance tracking in one place." },
           ].map((item) => (
             <details key={item.q} className="group px-5 py-4">

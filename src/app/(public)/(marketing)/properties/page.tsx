@@ -19,11 +19,14 @@ function PropertiesBrowser() {
   const sortBy = searchParams.get("sortBy") ?? "createdAt";
   const [q, setQ] = useState(search);
 
-  const { data, isLoading } = useProperties({ search, city, page, limit: "9", sortBy });
-  const propertiesRaw = data?.data as unknown;
-  const properties: Property[] | undefined = Array.isArray(propertiesRaw)
-    ? propertiesRaw
-    : ((propertiesRaw as { data?: Property[] })?.data);
+  const { data, isLoading } = useProperties({
+    search: search || undefined,
+    city: city || undefined,
+    page: Number(page) || 1,
+    limit: 9,
+    sortBy: (["createdAt", "title", "city"].includes(sortBy) ? sortBy : "createdAt") as "createdAt" | "title" | "city",
+  });
+  const properties: Property[] | undefined = data?.data;
 
   const update = (params: Record<string, string>) => {
     const sp = new URLSearchParams(searchParams.toString());

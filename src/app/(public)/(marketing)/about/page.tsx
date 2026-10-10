@@ -13,7 +13,7 @@ export default function AboutPage() {
         <p>
           Founded with the belief that renting should be transparent and stress-free, HavenMate
           verifies every landlord, documents every rental agreement, and keeps every tenant
-          protected through secure bKash payments and a full dispute audit trail.
+          protected through secure SSLCommerz payments and a full dispute audit trail.
         </p>
         <p>
           Our platform serves three roles — tenants looking for homes or roommates, landlords

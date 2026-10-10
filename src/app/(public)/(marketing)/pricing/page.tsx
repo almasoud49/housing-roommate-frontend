@@ -1,7 +1,7 @@
 export const metadata = { title: "Pricing" };
 
 const plans = [
-  { name: "Tenant", price: "Free", features: ["Browse all listings", "Apply to unlimited properties", "Roommate matching", "Maintenance requests", "Rent via bKash with receipts"] },
+  { name: "Tenant", price: "Free", features: ["Browse all listings", "Apply to unlimited properties", "Roommate matching", "Maintenance requests", "Rent via SSLCommerz with receipts"] },
   { name: "Landlord", price: "2% per successful rental", features: ["Unlimited property listings", "Application management", "Tenant screening", "Earnings dashboard", "Utility bill tracking"], highlight: true },
   { name: "Property Manager", price: "Custom", features: ["Multi-property oversight", "Maintenance coordination", "Tenant communication", "Reporting & audit logs", "Dedicated support"] },
 ];
