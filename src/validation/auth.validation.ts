@@ -19,6 +19,14 @@ export const registerSchema = z.object({
   role: z.enum(["TENANT", "LANDLORD", "PROPERTY_MANAGER"]),
 });
 
+/** Register form: same as `registerSchema` plus a confirm-password check (not sent to the API). */
+export const registerFormSchema = registerSchema
+  .extend({ confirmPassword: z.string().min(1, "Please confirm your password") })
+  .refine((v) => v.password === v.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const verifyAccountSchema = z.object({
   email: z.email("Invalid email address"),
   otp: z.string().length(6, "OTP must be exactly 6 digits"),
