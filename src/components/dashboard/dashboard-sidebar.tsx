@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import Logo from "@/assets/svg/Logo";
 import { UserRole, SidebarItems } from "@/types";
-import { adminRoutes, landlordRoutes, tenantRoutes } from "@/routes";
+import { adminRoutes, landlordRoutes, propertyManagerRoutes, tenantRoutes } from "@/routes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -22,7 +22,7 @@ const sidebarRoutes: Partial<Record<UserRole, SidebarItems>> = {
   ADMIN: adminRoutes,
   LANDLORD: landlordRoutes,
   TENANT: tenantRoutes,
-  PROPERTY_MANAGER: landlordRoutes,
+  PROPERTY_MANAGER: propertyManagerRoutes,
 };
 
 export function DashboardSidebar({ role }: { role: UserRole }) {
