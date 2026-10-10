@@ -1,49 +1,69 @@
 "use client";
 
-import { useLandlordApplications, useUpdateApplicationStatus } from "@/hooks";
-import { applicationTitle, type Application } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
+import { useLandlordApplications, useUpdateApplicationStatus } from "@/hooks";
 import { getErrorMessage } from "@/lib/apiClient";
-import { useQueryClient } from "@tanstack/react-query";
+import { applicationTitle, roomLabel, type ApplicationStatus } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
+import { ConfirmButton, ListState, PageHeader, PaginationBar, StatusBadge } from "@/components/modules/common";
+import { formatDate } from "@/utils/format.util";
 
 export default function LandlordApplicationsPage() {
-  const qc = useQueryClient();
-  const { data, isLoading } = useLandlordApplications();
-  const { mutate: setStatus } = useUpdateApplicationStatus();
-  const applications = data?.data as Application[] | undefined;
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState<ApplicationStatus | "">("");
+  const [search, setSearch] = useState("");
+  const { data, isLoading, error } = useLandlordApplications({ page, limit: 10, status: status || undefined, search: search || undefined });
+  const { mutate: setAppStatus, isPending } = useUpdateApplicationStatus();
+  const applications = data?.data ?? [];
 
-  if (isLoading) return <Skeleton className="h-64 w-full" />;
+  const change = (id: string, s: ApplicationStatus) =>
+    setAppStatus({ id, status: s }, { onSuccess: () => toast.success(s === "ACCEPTED" ? "Application accepted" : "Application rejected"), onError: (e) => toast.error(getErrorMessage(e)) });
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Applications</h1>
-      {!applications?.length ? (
-        <p className="text-muted-foreground">No applications received yet.</p>
-      ) : (
+      <PageHeader title="Applications" />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <Input className="w-64" placeholder="Search tenant, room, building..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+        <NativeSelect className="w-44" value={status} onChange={(e) => { setStatus(e.target.value as ApplicationStatus | ""); setPage(1); }}>
+          <option value="">All statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="ACCEPTED">Accepted</option>
+          <option value="REJECTED">Rejected</option>
+        </NativeSelect>
+      </div>
+      <ListState isLoading={isLoading} error={error} isEmpty={!applications.length} emptyText="No applications received yet.">
         <div className="space-y-3">
           {applications.map((a) => (
             <div key={a.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-medium">{a.tenant?.name ?? "Applicant"} — {applicationTitle(a)}</p>
-                {a.message && <p className="text-sm text-muted-foreground">{a.message}</p>}
-                <p className="text-xs text-muted-foreground">{new Date(a.createdAt).toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground">{roomLabel(a.room)}</p>
+                {a.message && <p className="mt-1 text-sm">“{a.message}”</p>}
+                <p className="text-xs text-muted-foreground">{formatDate(a.createdAt)}{a.tenant?.email ? ` · ${a.tenant.email}` : ""}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary">{a.status}</Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge value={a.status} />
                 {a.status === "PENDING" && (
                   <>
-                    <Button size="sm" onClick={() => setStatus({ id: a.id, status: "ACCEPTED" }, { onSuccess: () => { toast.success("Accepted"); qc.invalidateQueries({ queryKey: ["landlord-applications"] }); }, onError: (e) => toast.error(getErrorMessage(e)) })}>Accept</Button>
-                    <Button size="sm" variant="destructive" onClick={() => setStatus({ id: a.id, status: "REJECTED" }, { onSuccess: () => { toast.success("Rejected"); qc.invalidateQueries({ queryKey: ["landlord-applications"] }); }, onError: (e) => toast.error(getErrorMessage(e)) })}>Reject</Button>
+                    <Button size="sm" disabled={isPending} onClick={() => change(a.id, "ACCEPTED")}>Accept</Button>
+                    <ConfirmButton size="sm" variant="destructive" title="Reject this application?" confirmLabel="Reject" pending={isPending} onConfirm={() => change(a.id, "REJECTED")}>
+                      Reject
+                    </ConfirmButton>
                   </>
+                )}
+                {a.status === "ACCEPTED" && (
+                  <Button size="sm" variant="outline" render={<Link href="/landlord/documents" />}>Documents</Button>
                 )}
               </div>
             </div>
           ))}
         </div>
-      )}
+        <PaginationBar meta={data?.meta} onPageChange={setPage} />
+      </ListState>
     </div>
   );
 }

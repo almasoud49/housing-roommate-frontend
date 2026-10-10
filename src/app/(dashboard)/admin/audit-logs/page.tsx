@@ -1,23 +1,27 @@
 "use client";
 
+import { useState } from "react";
 import { useAuditLogs } from "@/hooks";
-import type { AuditLog } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ListState, PageHeader, PaginationBar } from "@/components/modules/common";
+import { formatDateTime } from "@/utils/format.util";
 
 export default function AuditLogsPage() {
-  const { data, isLoading } = useAuditLogs();
-  const d = data?.data as unknown;
-  const logs: AuditLog[] = Array.isArray(d) ? d : ((d as { data?: AuditLog[] })?.data ?? []);
-
-  if (isLoading) return <Skeleton className="h-64 w-full" />;
+  const [page, setPage] = useState(1);
+  const [action, setAction] = useState("");
+  const [entityType, setEntityType] = useState("");
+  const { data, isLoading, error } = useAuditLogs({ page, limit: 15, action: action || undefined, entityType: entityType || undefined });
+  const logs = data?.data ?? [];
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Audit Logs</h1>
-      {!logs.length ? (
-        <p className="text-muted-foreground">No audit logs yet.</p>
-      ) : (
+      <PageHeader title="Audit Logs" />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <Input className="w-56" placeholder="Filter by action..." value={action} onChange={(e) => { setAction(e.target.value); setPage(1); }} />
+        <Input className="w-56" placeholder="Filter by entity type..." value={entityType} onChange={(e) => { setEntityType(e.target.value); setPage(1); }} />
+      </div>
+      <ListState isLoading={isLoading} error={error} isEmpty={!logs.length} emptyText="No audit logs found.">
         <Table>
           <TableHeader>
             <TableRow>
@@ -31,14 +35,15 @@ export default function AuditLogsPage() {
             {logs.map((log) => (
               <TableRow key={log.id}>
                 <TableCell>{log.action}</TableCell>
-                <TableCell>{log.entity ?? "—"}</TableCell>
+                <TableCell>{log.entityType ?? "—"}</TableCell>
                 <TableCell>{log.user?.email ?? "—"}</TableCell>
-                <TableCell>{new Date(log.createdAt).toLocaleString()}</TableCell>
+                <TableCell>{formatDateTime(log.createdAt)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      )}
+        <PaginationBar meta={data?.meta} onPageChange={setPage} />
+      </ListState>
     </div>
   );
 }

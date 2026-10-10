@@ -1,60 +1,96 @@
 "use client";
 
-import { useState } from "react";
-import { useMyApplications, useInitiatePayment } from "@/hooks";
-import { applicationTitle, type Application } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useInitiatePayment, useMyApplications, usePaymentStatus, useSslcommerzStatus } from "@/hooks";
 import { getErrorMessage } from "@/lib/apiClient";
+import { applicationTitle, roomLabel, type Application, type Payment } from "@/types";
+import { Button } from "@/components/ui/button";
+import { ListState, PageHeader, StatusBadge } from "@/components/modules/common";
+import { formatDate, formatMoney } from "@/utils/format.util";
 
-export default function PaymentsPage() {
-  const { data, isLoading } = useMyApplications();
+function PaymentRow({ application }: { application: Application }) {
+  const { data, isLoading } = usePaymentStatus(application.id);
+  const payment: Payment | null | undefined = data?.data;
   const { mutate: pay, isPending } = useInitiatePayment();
-  const [payingId, setPayingId] = useState<string | null>(null);
-  const applications = data?.data as Application[] | undefined;
-  const payable = (applications ?? []).filter((a) => a.status === "ACCEPTED");
+  const [checked, setChecked] = useState(false);
+  const { data: sslStatus, isFetching: isFetchingSsl, refetch: refetchSsl } = useSslcommerzStatus(payment?.sslCommerzValId ?? "", checked);
+  const amount = application.room?.price ?? payment?.amount ?? 0;
 
-  const handlePay = (applicationId: string, amount: number) => {
-    setPayingId(applicationId);
+  const handlePay = () =>
     pay(
-      { applicationId, amount, currency: "BDT" },
+      { applicationId: application.id, amount, currency: "BDT" },
       {
-        onSuccess: (res: any) => {
-          const url = res?.data?.bkashCreateResponse?.bkashURL;
-          if (url) window.location.href = url;
-          else toast.success("Payment initiated. Check your bKash app.");
+        onSuccess: (res) => {
+          const url = res?.data?.sslCommerzCreateResponse?.GatewayPageURL;
+          if (url) {
+            window.location.href = url;
+            // After redirect completes, refresh payment status
+            setChecked(true);
+          } else {
+            toast.success(res?.data?.status === "COMPLETED" ? "This application is already paid." : "Payment initiated with SSLCommerz.");
+          }
         },
         onError: (err) => toast.error(getErrorMessage(err)),
-        onSettled: () => setPayingId(null),
       },
     );
-  };
 
-  if (isLoading) return <Skeleton className="h-64 w-full" />;
+  const completed = payment?.status === "COMPLETED" || payment?.status === "REFUNDED";
+
+  // Refresh SSLCommerz status after redirect from payment success page
+  useEffect(() => {
+    if (checked && payment?.sslCommerzValId) {
+      refetchSsl();
+      setChecked(false);
+    }
+  }, [checked, payment?.sslCommerzValId]);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="font-medium">{applicationTitle(application)}</p>
+        <p className="text-sm text-muted-foreground">
+          {roomLabel(application.room)} · {formatMoney(payment?.amount ?? amount)}
+          {payment && ` · ${formatDate(payment.createdAt)}`}
+        </p>
+        {checked && typeof sslStatus?.data === "string" && (
+          <p className="mt-1 text-xs text-muted-foreground">SSLCommerz status refreshed.</p>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        {isLoading ? null : <StatusBadge value={payment?.status ?? "PENDING"} />}
+        {!completed && payment?.sslCommerzValId && (
+          <Button size="sm" variant="outline" disabled={isFetchingSsl} onClick={() => setChecked(true)}>
+            {isFetchingSsl ? "Checking..." : "Check status"}
+          </Button>
+        )}
+        {!completed && (
+          <Button size="sm" disabled={isPending || !amount} onClick={handlePay}>
+            {isPending ? "Redirecting..." : payment ? "Continue payment" : "Pay with SSLCommerz"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function PaymentsPage() {
+  const { data, isLoading, error } = useMyApplications({ status: "ACCEPTED", limit: 50 });
+  const payable = data?.data ?? [];
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Payments</h1>
-      <h2 className="mb-3 text-lg font-semibold">Pay for Accepted Applications</h2>
-      {payable.length === 0 ? (
-        <p className="text-muted-foreground">No accepted applications awaiting payment.</p>
-      ) : (
+      <PageHeader
+        title="Payments"
+        description="Pay for your accepted applications via SSLCommerz — test mode, no real charges."
+      />
+      <ListState isLoading={isLoading} error={error} isEmpty={!payable.length} emptyText="No accepted applications awaiting payment.">
         <div className="space-y-3">
           {payable.map((a) => (
-            <div key={a.id} className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <p className="font-medium">{applicationTitle(a)}</p>
-                <Badge variant="secondary">{a.status}</Badge>
-              </div>
-              <Button disabled={isPending && payingId === a.id} onClick={() => handlePay(a.id, 1000)}>
-                {isPending && payingId === a.id ? "Redirecting..." : "Pay with bKash"}
-              </Button>
-            </div>
+            <PaymentRow key={a.id} application={a} />
           ))}
         </div>
-      )}
+      </ListState>
     </div>
   );
 }

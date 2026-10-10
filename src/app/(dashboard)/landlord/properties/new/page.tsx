@@ -39,9 +39,9 @@ export default function NewPropertyPage() {
 
   const submit = () => {
     create(form, {
-      onSuccess: () => {
-        toast.success("Property created!");
-        router.push("/landlord/properties");
+      onSuccess: (res) => {
+        toast.success("Property created! Now add buildings, flats and rooms.");
+        router.push(res?.data?.id ? `/landlord/properties/${res.data.id}` : "/landlord/properties");
       },
       onError: (e) => toast.error(getErrorMessage(e)),
     });

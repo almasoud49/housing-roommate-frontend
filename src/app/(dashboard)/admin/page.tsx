@@ -9,7 +9,7 @@ const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
 
 export default function AdminOverviewPage() {
   const { data, isLoading } = useAdminStats();
-  const stats = data?.data as Record<string, number> | undefined;
+  const stats = data?.data;
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;
   if (!stats) return <p className="text-muted-foreground">Failed to load stats.</p>;
@@ -17,6 +17,7 @@ export default function AdminOverviewPage() {
   const roleData = [
     { name: "Tenants", value: stats.totalTenants },
     { name: "Landlords", value: stats.totalLandlords },
+    { name: "Property managers", value: Math.max(stats.totalUsers - stats.totalTenants - stats.totalLandlords - stats.totalAdmins, 0) },
     { name: "Admins", value: stats.totalAdmins },
   ];
   const barData = [

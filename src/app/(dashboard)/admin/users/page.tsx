@@ -1,62 +1,49 @@
 "use client";
 
-import { useAdminUsers, useToggleUserStatus } from "@/hooks";
-import type { AdminUser } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useAdminUsers, useCurrentUser, useDeleteUser, useToggleUserStatus, useUpdateUserRole } from "@/hooks";
 import { getErrorMessage } from "@/lib/apiClient";
-import { useQueryClient } from "@tanstack/react-query";
+import type { AdminUser, UserRole } from "@/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ConfirmButton, ListState, PageHeader, PaginationBar, StatusBadge } from "@/components/modules/common";
+import { formatDate, humanize } from "@/utils/format.util";
 
-function UsersTable() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const roleFilter = searchParams.get("role") ?? "";
-  const statusFilter = searchParams.get("status") ?? "";
-  const qc = useQueryClient();
-  const { data, isLoading } = useAdminUsers({
-    role: roleFilter || undefined,
-    status: statusFilter || undefined,
-  });
-  const { mutate: toggleStatus } = useToggleUserStatus();
+const ROLES: UserRole[] = ["TENANT", "LANDLORD", "PROPERTY_MANAGER", "ADMIN"];
+const onError = (e: unknown) => toast.error(getErrorMessage(e));
 
-  const d = data?.data as unknown;
-  const users: AdminUser[] = Array.isArray(d) ? d : ((d as { data?: AdminUser[] })?.data ?? []);
-
-  const update = (key: string, value: string) => {
-    const sp = new URLSearchParams(searchParams.toString());
-    if (value) sp.set(key, value);
-    else sp.delete(key);
-    router.push(`/admin/users?${sp.toString()}`);
-  };
+export default function AdminUsersPage() {
+  const { user: me } = useCurrentUser();
+  const [page, setPage] = useState(1);
+  const [role, setRole] = useState<UserRole | "">("");
+  const [status, setStatus] = useState<"ACTIVE" | "BLOCKED" | "">("");
+  const [search, setSearch] = useState("");
+  const { data, isLoading, error } = useAdminUsers({ page, limit: 10, role: role || undefined, status: status || undefined, search: search || undefined });
+  const toggle = useToggleUserStatus();
+  const changeRole = useUpdateUserRole();
+  const remove = useDeleteUser();
+  const users: AdminUser[] = data?.data ?? [];
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">User Management</h1>
-      <div className="mb-4 flex gap-3">
-        <select className="h-9 rounded-md border px-3 text-sm" value={roleFilter} onChange={(e) => update("role", e.target.value)}>
+      <PageHeader title="User Management" />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <Input className="w-64" placeholder="Search name or email..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+        <NativeSelect className="w-44" value={role} onChange={(e) => { setRole(e.target.value as UserRole | ""); setPage(1); }}>
           <option value="">All roles</option>
-          <option value="TENANT">Tenant</option>
-          <option value="LANDLORD">Landlord</option>
-          <option value="PROPERTY_MANAGER">Manager</option>
-          <option value="ADMIN">Admin</option>
-        </select>
-        <select className="h-9 rounded-md border px-3 text-sm" value={statusFilter} onChange={(e) => update("status", e.target.value)}>
+          {ROLES.map((r) => <option key={r} value={r}>{humanize(r)}</option>)}
+        </NativeSelect>
+        <NativeSelect className="w-44" value={status} onChange={(e) => { setStatus(e.target.value as typeof status); setPage(1); }}>
           <option value="">All statuses</option>
           <option value="ACTIVE">Active</option>
           <option value="BLOCKED">Blocked</option>
-        </select>
+        </NativeSelect>
       </div>
 
-      {isLoading ? (
-        <Skeleton className="h-64 w-full" />
-      ) : !users.length ? (
-        <p className="text-muted-foreground">No users found.</p>
-      ) : (
+      <ListState isLoading={isLoading} error={error} isEmpty={!users.length} emptyText="No users found.">
         <Table>
           <TableHeader>
             <TableRow>
@@ -65,54 +52,40 @@ function UsersTable() {
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Joined</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((u) => (
-              <TableRow key={u.id}>
-                <TableCell>{u.name}</TableCell>
-                <TableCell>{u.email}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{u.role}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={u.status === "ACTIVE" ? "default" : "destructive"}>{u.status}</Badge>
-                </TableCell>
-                <TableCell>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "-"}</TableCell>
-                <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      toggleStatus(
-                        { id: u.id, status: u.status === "ACTIVE" ? "BLOCKED" : "ACTIVE" },
-                        {
-                          onSuccess: () => {
-                            toast.success("Status updated");
-                            qc.invalidateQueries({ queryKey: ["admin-users"] });
-                          },
-                          onError: (e) => toast.error(getErrorMessage(e)),
-                        },
-                      )
-                    }
-                  >
-                    {u.status === "ACTIVE" ? "Block" : "Unblock"}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {users.map((u) => {
+              const isSelf = u.id === me?.id;
+              return (
+                <TableRow key={u.id}>
+                  <TableCell>{u.name}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell>
+                    <NativeSelect className="w-40" value={u.role} disabled={isSelf || changeRole.isPending} onChange={(e) => changeRole.mutate({ id: u.id, role: e.target.value as UserRole }, { onSuccess: () => toast.success("Role updated"), onError })}>
+                      {ROLES.map((r) => <option key={r} value={r}>{humanize(r)}</option>)}
+                    </NativeSelect>
+                  </TableCell>
+                  <TableCell><StatusBadge value={u.status} /></TableCell>
+                  <TableCell>{formatDate(u.createdAt)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" disabled={isSelf || toggle.isPending} onClick={() => toggle.mutate({ id: u.id, status: u.status === "ACTIVE" ? "BLOCKED" : "ACTIVE" }, { onSuccess: () => toast.success("Status updated"), onError })}>
+                        {u.status === "ACTIVE" ? "Block" : "Unblock"}
+                      </Button>
+                      <ConfirmButton size="sm" variant="destructive" disabled={isSelf} title={`Delete ${u.name}?`} description="This permanently removes the account." confirmLabel="Delete user" pending={remove.isPending} onConfirm={() => remove.mutate(u.id, { onSuccess: () => toast.success("User deleted"), onError })}>
+                        Delete
+                      </ConfirmButton>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
-      )}
+        <PaginationBar meta={data?.meta} onPageChange={setPage} />
+      </ListState>
     </div>
-  );
-}
-
-export default function AdminUsersPage() {
-  return (
-    <Suspense>
-      <UsersTable />
-    </Suspense>
   );
 }
